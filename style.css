@@ -969,3 +969,59 @@ body:not(.recurring-edit-mode)
 
     border: 1px solid var(--inputborder);
 }
+
+/* =================================
+   MOBILE HORIZONTAL PAN
+================================= */
+
+@media (max-width: 800px) {
+
+    html {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    body {
+        overflow-x: visible;
+        overflow-y: hidden;
+    }
+
+    .app {
+        width: max-content;
+        min-width: 100vw;
+    }
+
+    .todo-panel {
+        width: 250px;
+        flex-shrink: 0;
+    }
+
+    .calendar-panel {
+        width: 900px;
+        flex-shrink: 0;
+    }
+
+}
+
+/* =================================
+   MOBILE TOUCH DRAGGING
+================================= */
+
+@media (max-width: 800px) {
+
+    .task {
+        touch-action: none;
+    }
+
+    .touch-dragging {
+        position: fixed !important;
+        z-index: 10000 !important;
+
+        pointer-events: none;
+
+        opacity: 0.85;
+
+        width: 220px;
+    }
+
+}

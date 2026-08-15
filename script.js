@@ -2910,3 +2910,713 @@ async function startPlanner() {
 
 
 startPlanner();
+
+
+// =================================
+// MOBILE TOUCH DRAGGING
+// =================================
+
+let touchDragTask = null;
+let touchDragElement = null;
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+let touchCurrentX = 0;
+let touchCurrentY = 0;
+
+let touchHoldTimer = null;
+
+let touchDragging = false;
+
+let touchDragOffsetX = 0;
+let touchDragOffsetY = 0;
+
+let touchPanAnimation = null;
+
+
+// =================================
+// TOUCH DRAG SETTINGS
+// =================================
+
+const TOUCH_HOLD_TIME = 300;
+
+const TOUCH_EDGE_DISTANCE = 70;
+
+const TOUCH_PAN_SPEED = 8;
+
+
+// =================================
+// START TOUCH
+// =================================
+
+document.addEventListener(
+    "touchstart",
+    function(event) {
+
+        // Only respond to one finger.
+        if (event.touches.length !== 1) {
+            return;
+        }
+
+
+        const touch =
+            event.touches[0];
+
+
+        const taskElement =
+            event.target.closest(".task");
+
+
+        if (!taskElement) {
+            return;
+        }
+
+
+        const taskId =
+            Number(taskElement.dataset.taskId);
+
+
+        const task =
+            tasks.find(
+                function(item) {
+                    return item.id === taskId;
+                }
+            );
+
+
+        if (!task) {
+            return;
+        }
+
+
+        // Recurring tasks can only be
+        // moved while editing.
+        if (
+            isRecurringTask(task) &&
+            !recurringEditMode
+        ) {
+
+            return;
+
+        }
+
+
+        touchDragTask = task;
+
+        touchDragElement =
+            taskElement;
+
+
+        touchStartX =
+            touch.clientX;
+
+        touchStartY =
+            touch.clientY;
+
+
+        touchCurrentX =
+            touch.clientX;
+
+        touchCurrentY =
+            touch.clientY;
+
+
+        const rect =
+            taskElement.getBoundingClientRect();
+
+
+        touchDragOffsetX =
+            touch.clientX - rect.left;
+
+
+        touchDragOffsetY =
+            touch.clientY - rect.top;
+
+
+        // Wait before actually
+        // starting the drag.
+        touchHoldTimer =
+            setTimeout(
+                function() {
+
+                    startTouchDrag();
+
+                },
+                TOUCH_HOLD_TIME
+            );
+
+    },
+    {
+        passive: true
+    }
+);
+
+
+// =================================
+// START TOUCH DRAG
+// =================================
+
+function startTouchDrag() {
+
+    if (!touchDragTask || !touchDragElement) {
+        return;
+    }
+
+
+    touchDragging = true;
+
+
+    touchDragElement.classList.add(
+        "touch-dragging"
+    );
+
+
+    touchDragElement.style.width =
+        `${touchDragElement.offsetWidth}px`;
+
+
+    // Make the task follow the finger.
+    touchDragElement.style.left =
+        `${touchCurrentX - touchDragOffsetX}px`;
+
+
+    touchDragElement.style.top =
+        `${touchCurrentY - touchDragOffsetY}px`;
+
+
+    startTouchPan();
+
+}
+
+
+// =================================
+// TOUCH MOVE
+// =================================
+
+document.addEventListener(
+    "touchmove",
+    function(event) {
+
+        if (!touchDragTask) {
+            return;
+        }
+
+
+        const touch =
+            event.touches[0];
+
+
+        touchCurrentX =
+            touch.clientX;
+
+        touchCurrentY =
+            touch.clientY;
+
+
+        // If we haven't started dragging yet,
+        // moving too far cancels the hold.
+        if (!touchDragging) {
+
+            const distanceX =
+                Math.abs(
+                    touchCurrentX -
+                    touchStartX
+                );
+
+
+            const distanceY =
+                Math.abs(
+                    touchCurrentY -
+                    touchStartY
+                );
+
+
+            if (
+                distanceX > 10 ||
+                distanceY > 10
+            ) {
+
+                clearTimeout(
+                    touchHoldTimer
+                );
+
+                touchDragTask = null;
+
+                touchDragElement = null;
+
+            }
+
+
+            return;
+
+        }
+
+
+        // Prevent normal page scrolling
+        // while dragging.
+        event.preventDefault();
+
+
+        touchDragElement.style.left =
+            `${touchCurrentX - touchDragOffsetX}px`;
+
+
+        touchDragElement.style.top =
+            `${touchCurrentY - touchDragOffsetY}px`;
+
+
+    },
+    {
+        passive: false
+    }
+);
+
+
+// =================================
+// TOUCH END
+// =================================
+
+document.addEventListener(
+    "touchend",
+    function() {
+
+        clearTimeout(
+            touchHoldTimer
+        );
+
+
+        if (!touchDragTask) {
+            return;
+        }
+
+
+        if (touchDragging) {
+
+            finishTouchDrop();
+
+        }
+
+
+        stopTouchPan();
+
+
+        touchDragTask = null;
+
+        touchDragElement = null;
+
+        touchDragging = false;
+
+    }
+);
+
+
+// =================================
+// TOUCH CANCEL
+// =================================
+
+document.addEventListener(
+    "touchcancel",
+    function() {
+
+        clearTimeout(
+            touchHoldTimer
+        );
+
+
+        stopTouchPan();
+
+
+        if (touchDragElement) {
+
+            touchDragElement.classList.remove(
+                "touch-dragging"
+            );
+
+        }
+
+
+        touchDragTask = null;
+
+        touchDragElement = null;
+
+        touchDragging = false;
+
+    }
+);
+
+
+// =================================
+// FIND DROP DAY
+// =================================
+
+function getTouchDropDay() {
+
+    const elements =
+        document.elementsFromPoint(
+            touchCurrentX,
+            touchCurrentY
+        );
+
+
+    for (
+        const element of elements
+    ) {
+
+        if (
+            element.dataset &&
+            element.dataset.date
+        ) {
+
+            return element;
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+// =================================
+// FINISH TOUCH DROP
+// =================================
+
+function finishTouchDrop() {
+
+    const task =
+        touchDragTask;
+
+
+    const day =
+        getTouchDropDay();
+
+
+    if (!day) {
+
+        restoreTouchDragElement();
+
+        return;
+
+    }
+
+
+    // =================================
+    // RECURRING TASK
+    // =================================
+
+    if (isRecurringTask(task)) {
+
+        if (!recurringEditMode) {
+
+            restoreTouchDragElement();
+
+            return;
+
+        }
+
+
+        const droppedDate =
+            day.dataset.date;
+
+
+        const droppedDateObject =
+            new Date(
+                `${droppedDate}T00:00:00`
+            );
+
+
+        task.recurrence.weekday =
+            droppedDateObject.getDay();
+
+
+        if (
+            day.classList.contains("day")
+        ) {
+
+            task.startTime =
+                getTouchTimeFromPosition(
+                    day,
+                    touchCurrentY
+                );
+
+        }
+
+
+        saveTasks();
+
+        restoreTouchDragElement();
+
+        renderCalendar();
+
+        renderTasks();
+
+        return;
+
+    }
+
+
+    // =================================
+    // NORMAL TASK
+    // =================================
+
+    task.date =
+        day.dataset.date;
+
+
+    if (
+        day.classList.contains("day")
+    ) {
+
+        task.startTime =
+            getTouchTimeFromPosition(
+                day,
+                touchCurrentY
+            );
+
+    }
+
+    else {
+
+        task.startTime = null;
+
+    }
+
+
+    saveTasks();
+
+    restoreTouchDragElement();
+
+    renderCalendar();
+
+    renderTasks();
+
+}
+
+
+// =================================
+// TOUCH TIME
+// =================================
+
+function getTouchTimeFromPosition(
+    day,
+    mouseY
+) {
+
+    const rect =
+        day.getBoundingClientRect();
+
+
+    const taskTop =
+        mouseY -
+        touchDragOffsetY;
+
+
+    const position =
+        taskTop -
+        rect.top;
+
+
+    const rawSlot =
+        position /
+        CALENDAR_CONFIG.slotHeight;
+
+
+    const slotIndex =
+        Math.round(rawSlot);
+
+
+    let totalMinutes =
+        (
+            CALENDAR_CONFIG.startHour *
+            60
+        ) +
+        (
+            slotIndex *
+            CALENDAR_CONFIG.minutesPerSlot
+        );
+
+
+    const minimumMinutes =
+        CALENDAR_CONFIG.startHour *
+        60;
+
+
+    const maximumMinutes =
+        (
+            CALENDAR_CONFIG.endHour *
+            60
+        ) -
+        CALENDAR_CONFIG.minutesPerSlot;
+
+
+    totalMinutes =
+        Math.max(
+            minimumMinutes,
+            Math.min(
+                maximumMinutes,
+                totalMinutes
+            )
+        );
+
+
+    const hour =
+        Math.floor(
+            totalMinutes / 60
+        );
+
+
+    const minute =
+        totalMinutes % 60;
+
+
+    return (
+        `${String(hour).padStart(2, "0")}:` +
+        `${String(minute).padStart(2, "0")}`
+    );
+
+}
+
+
+// =================================
+// RESTORE TASK ELEMENT
+// =================================
+
+function restoreTouchDragElement() {
+
+    if (!touchDragElement) {
+        return;
+    }
+
+
+    touchDragElement.classList.remove(
+        "touch-dragging"
+    );
+
+
+    touchDragElement.style.position = "";
+
+    touchDragElement.style.left = "";
+
+    touchDragElement.style.top = "";
+
+    touchDragElement.style.width = "";
+
+}
+
+
+// =================================
+// AUTOMATIC HORIZONTAL PAN
+// =================================
+
+function startTouchPan() {
+
+    if (touchPanAnimation) {
+        return;
+    }
+
+
+    function pan() {
+
+        if (!touchDragging) {
+
+            touchPanAnimation = null;
+
+            return;
+
+        }
+
+
+        const screenWidth =
+            window.innerWidth;
+
+
+        // Near the RIGHT edge.
+        if (
+            touchCurrentX >
+            screenWidth -
+            TOUCH_EDGE_DISTANCE
+        ) {
+
+            const distance =
+                screenWidth -
+                touchCurrentX;
+
+
+            const intensity =
+                (
+                    TOUCH_EDGE_DISTANCE -
+                    distance
+                ) /
+                TOUCH_EDGE_DISTANCE;
+
+
+            window.scrollBy({
+                left:
+                    intensity *
+                    TOUCH_PAN_SPEED,
+                top: 0
+            });
+
+        }
+
+
+        // Near the LEFT edge.
+        else if (
+            touchCurrentX <
+            TOUCH_EDGE_DISTANCE
+        ) {
+
+            const intensity =
+                (
+                    TOUCH_EDGE_DISTANCE -
+                    touchCurrentX
+                ) /
+                TOUCH_EDGE_DISTANCE;
+
+
+            window.scrollBy({
+                left:
+                    -intensity *
+                    TOUCH_PAN_SPEED,
+                top: 0
+            });
+
+        }
+
+
+        touchPanAnimation =
+            requestAnimationFrame(
+                pan
+            );
+
+    }
+
+
+    touchPanAnimation =
+        requestAnimationFrame(
+            pan
+        );
+
+}
+
+
+// =================================
+// STOP AUTOMATIC PAN
+// =================================
+
+function stopTouchPan() {
+
+    if (touchPanAnimation) {
+
+        cancelAnimationFrame(
+            touchPanAnimation
+        );
+
+        touchPanAnimation = null;
+
+    }
+
+}
