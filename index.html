@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>My Planner F26</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+<!-- ==============================
+     LOG IN
+=============================== -->
+
+<div id="authScreen">
+
+    <div class="auth-box">
+
+        <h2>My Planner</h2>
+
+        <input
+            type="email"
+            id="emailInput"
+            placeholder="Email"
+        >
+
+        <input
+            type="password"
+            id="passwordInput"
+            placeholder="Password"
+        >
+
+        <button id="loginButton">
+            Log in
+        </button>
+
+        <p id="authMessage"></p>
+
+    </div>
+
+</div>
+
+<div class="app">
+
+
+    <!-- ==============================
+         LEFT: TO-DO LIST
+    =============================== -->
+
+    <aside class="todo-panel">
+
+        <h2>My Tasks</h2>
+
+
+        <div class="task-input">
+
+            <input
+                type="text"
+                id="taskInput"
+                placeholder="What needs doing?"
+            >
+
+        </div>
+
+
+        <div id="taskList"></div>
+
+    </aside>
+
+
+
+    <!-- ==============================
+         RIGHT: CALENDAR
+    =============================== -->
+
+    <main class="calendar-panel">
+
+        <div class="calendar-area">
+
+
+            <!-- ==========================
+                 CALENDAR HEADER
+            =========================== -->
+
+            <div class="calendar-header">
+
+
+                <!-- TIME COLUMN SPACER -->
+
+                <div class="time-spacer"></div>
+
+
+                <!-- MONDAY - FRIDAY -->
+
+                <div
+                    class="weekday-header"
+                    id="weekdayHeader"
+                ></div>
+
+
+                <!-- WEEK NAVIGATION -->
+
+                <div class="week-navigation">
+
+                    <button
+                        id="previousWeek"
+                        class="week-nav-button"
+                    >
+                        ←
+                    </button>
+
+
+                    <h1 id="weekTitle"></h1>
+
+
+                    <button
+                        id="nextWeek"
+                        class="week-nav-button"
+                    >
+                        →
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==========================
+                 CALENDAR BODY
+            =========================== -->
+
+            <div class="calendar-body">
+
+
+                <!-- ==========================
+                     WEEKDAY SCROLL AREA
+                =========================== -->
+
+                <div class="weekday-scroll">
+
+
+                    <!-- TIME + MONDAY-FRIDAY -->
+
+                    <div class="weekday-body">
+
+
+                        <!-- TIME COLUMN -->
+
+                        <div
+                            class="time-column"
+                            id="timeColumn"
+                        ></div>
+
+
+                        <!-- MONDAY-FRIDAY -->
+
+                        <div
+                            class="weekday-row"
+                            id="weekdayRow"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==========================
+                     SATURDAY-SUNDAY
+                =========================== -->
+
+                <div
+                    class="weekend-column"
+                    id="weekendColumn"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+    <!-- ==============================
+         GENERAL MENU
+    =============================== -->
+
+    <div class="menu-switcher">
+
+        <button
+            class="theme-button"
+            id="themeButton"
+            aria-label="Open theme menu"
+        ></button>
+
+        <div
+            class="menu"
+            id="themeMenu"
+        >
+
+            <button
+                class="theme-option"
+                data-theme="paper"
+            >
+                <span class="theme-preview paper-preview"></span>
+                Paper & Light Green
+            </button>
+
+            <button
+                class="theme-option"
+                data-theme="purple"
+            >
+                <span class="theme-preview purple-preview"></span>
+                Purple Dark
+            </button>
+
+            <button
+                class="theme-option"
+                data-theme="blueCoral"
+            >
+                <span class="theme-preview blue-coral-preview"></span>
+                Blue & Coral
+            </button>
+
+            <button
+                class="theme-option"
+                data-theme="sunset"
+            >
+                <span class="theme-preview sunset-preview"></span>
+                Sunset
+            </button>
+
+            <button
+                class="recurring-edit-button"
+                id="recurringEditButton"
+                type="button"
+            >
+                Edit recurring tasks
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==============================
+         RECURRING TASK DELETE MODAL
+    =============================== -->
+
+    <div
+        class="recurring-delete-overlay"
+        id="recurringDeleteOverlay"
+        aria-hidden="true"
+    >
+
+        <div
+            class="recurring-delete-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="recurringDeleteTitle"
+        >
+
+            <h3 id="recurringDeleteTitle">
+                Delete recurring task?
+            </h3>
+
+            <button
+                class="recurring-delete-option"
+                id="deleteThisInstance"
+                type="button"
+            >
+                Delete this instance
+            </button>
+
+            <button
+                class="recurring-delete-option"
+                id="deleteFutureInstances"
+                type="button"
+            >
+                Delete this instance and all future instances
+            </button>
+
+            <button
+                class="recurring-delete-option"
+                id="cancelRecurringDelete"
+                type="button"
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==============================
+         JAVASCRIPT
+    =============================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>

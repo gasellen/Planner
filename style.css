@@ -1,0 +1,971 @@
+/* =================================
+   GLOBAL
+================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background-color: var(--background);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif
+    
+    /*Optima, sans-serif;*/
+}
+
+
+/* =================================
+   APP LAYOUT
+================================= */
+
+.app {
+    display: flex;
+    height: 100vh;
+    gap: 20px;
+    padding: 20px;
+}
+
+
+/* =================================
+   TODO PANEL
+================================= */
+
+.todo-panel {
+    width: 250px;
+    flex-shrink: 0;
+
+    padding: 20px;
+
+    background-color: var(--panel);
+
+    border: 3px solid var(--panelborder);
+    border-radius: 20px;
+}
+
+.todo-panel h2 {
+    margin-top: 0;
+    font-size: 24px;
+}
+
+
+/* =================================
+   TASK INPUT
+================================= */
+
+.task-input input {
+    width: 100%;
+
+    padding: 10px;
+
+    border: 1px solid var(--inputborder);
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 14px;
+
+    background-color: var(--input);
+    color: var(--text);
+
+    outline: none;
+}
+
+.task-input input::placeholder {
+    color: var(--text);
+    opacity: 0.6;
+}
+
+.task-input input:focus {
+    border-color: var(--text);
+}
+
+
+/* =================================
+   TODO LIST
+================================= */
+
+#taskList {
+    margin-top: 20px;
+}
+
+
+/* =================================
+   TASKS
+================================= */
+
+.task {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    margin-bottom: 12px;
+    padding: 12px;
+
+    background-color: var(--task);
+    border-radius: 12px;
+
+    cursor: grab;
+
+    border: 2px solid var(--taskborder);
+}
+
+.task:active {
+    cursor: grabbing;
+}
+
+
+/* =================================
+   TASK CHECKBOX
+================================= */
+
+.task input[type="checkbox"] {
+    appearance: none;
+
+    width: 16px;
+    height: 16px;
+
+    margin: 0;
+
+    flex-shrink: 0;
+
+    border: 2px solid var(--checkbox);
+    border-radius: 4px;
+
+    background-color: transparent;
+
+    cursor: pointer;
+}
+
+.task input[type="checkbox"]:checked {
+    background-color: var(--checkbox);
+}
+
+
+/* =================================
+   TASK TEXT
+================================= */
+
+.task-text {
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+}
+
+.task-text.completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+
+/* =================================
+   DELETE TASK BUTTON
+================================= */
+
+.delete-task-button {
+    margin-left: auto;
+
+    padding: 2px;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 11px;
+
+    cursor: pointer;
+
+    opacity: 0;
+
+    transition: opacity 0.15s ease;
+}
+
+.task:hover .delete-task-button {
+    opacity: 0.65;
+}
+
+.delete-task-button:hover {
+    opacity: 1 !important;
+}
+
+
+/* =================================
+   CALENDAR PANEL
+================================= */
+
+.calendar-panel {
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 20px;
+
+    background-color: var(--panel);
+
+    border: 3px solid var(--panelborder);
+    border-radius: 20px;
+}
+
+
+/* =================================
+   CALENDAR AREA
+================================= */
+
+.calendar-area {
+    flex: 1;
+
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =================================
+   CALENDAR HEADER
+================================= */
+
+.calendar-header {
+    display: flex;
+
+    gap: 10px;
+
+    flex-shrink: 0;
+
+    margin-bottom: 8px;
+}
+
+.time-spacer {
+    width: 40px;
+    flex-shrink: 0;
+}
+
+
+/* =================================
+   WEEKDAY HEADER
+================================= */
+
+.weekday-header {
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
+    gap: 10px;
+
+    width: calc(100% - 210px);
+}
+
+.weekday-header-day {
+    text-align: center;
+
+    font-weight: 600;
+}
+
+
+/* =================================
+   WEEK NAVIGATION
+================================= */
+
+.week-navigation {
+    width: 210px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+}
+
+.week-navigation h1 {
+    margin: 0;
+
+    font-size: 16px;
+}
+
+.week-nav-button {
+    padding: 4px 6px;
+
+    border: none;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 18px;
+
+    cursor: pointer;
+}
+
+.week-nav-button:hover {
+    background-color: var(--task);
+
+    border-radius: 8px;
+}
+
+
+/* =================================
+   CALENDAR BODY
+================================= */
+
+.calendar-body {
+    flex: 1;
+
+    min-height: 0;
+
+    display: flex;
+
+    gap: 10px;
+}
+
+
+/* =================================
+   WEEKDAY SCROLL
+================================= */
+
+.weekday-scroll {
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.weekday-body {
+    display: flex;
+
+    gap: 10px;
+
+    min-height: 100%;
+}
+
+
+/* =================================
+   TIME COLUMN
+================================= */
+
+.time-column {
+    width: 40px;
+
+    flex-shrink: 0;
+}
+
+.time-slot {
+    height: var(--slot-height);
+
+    padding-right: 5px;
+
+    color: var(--text);
+
+    font-size: 12px;
+
+    text-align: right;
+}
+
+
+/* =================================
+   WEEKDAYS
+================================= */
+
+.weekday-row {
+    display: flex;
+
+    flex: 1;
+
+    gap: 10px;
+
+    min-width: 0;
+}
+
+.day {
+    position: relative;
+
+    flex: 1;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    background-color: var(--background);
+
+    border-radius: 15px;
+}
+
+
+/* =================================
+   TIME GRID
+================================= */
+
+.time-grid {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 100%;
+
+    z-index: 0;
+
+    pointer-events: none;
+}
+
+.grid-slot {
+    height: var(--slot-height);
+
+    border-top: 1px solid transparent;
+}
+
+.grid-slot.hour-line {
+    border-top: 1px solid var(--grid);
+}
+
+
+/* =================================
+   CALENDAR TASKS
+================================= */
+
+.calendar-task {
+    position: absolute;
+
+    left: 5px;
+    right: 5px;
+
+    z-index: 10;
+
+    align-items: flex-start;
+    padding: 6px 8px;
+}
+
+/* =================================
+   WEEKEND TASKS
+================================= */
+
+.weekend-day .calendar-task {
+    position: relative;
+
+    left: auto;
+    right: auto;
+    top: auto !important;
+
+    width: 100%;
+
+    margin-bottom: 8px;
+}
+
+/* =================================
+   REGULAR CALENDAR TASKS
+================================= */
+
+.regular-task {
+    z-index: 10;
+}
+
+
+/* =================================
+   RECURRING TASKS
+================================= */
+
+.recurring-task {
+    z-index: 5;
+
+    background-color: var(--recurring);
+
+    opacity: 0.40;
+}
+
+
+/*
+   Recurring tasks become slightly more
+   visible while editing them.
+*/
+
+.recurring-edit-mode .recurring-task {
+    opacity: 1;
+}
+
+
+/*
+   Recurring events should never appear
+   completed.
+*/
+
+.recurring-task .task-text {
+    text-decoration: none;
+}
+
+
+/*
+   Recurring tasks should not show
+   resize handles unless editing.
+*/
+
+.recurring-task .task-resize-handle {
+    display: none;
+}
+
+.recurring-edit-mode
+.recurring-task
+.task-resize-handle {
+    display: block;
+}
+
+
+/*
+   Recurring tasks cannot accidentally
+   interfere with regular tasks when
+   not editing.
+*/
+
+body:not(.recurring-edit-mode)
+.recurring-task {
+    cursor: default;
+}
+
+/* =================================
+   RECURRING EDIT MODE
+================================= */
+
+/*
+   Hide all regular tasks while editing
+   recurring tasks.
+*/
+
+.recurring-edit-mode .regular-task {
+    display: none;
+}
+
+
+/* =================================
+   WEEKEND
+================================= */
+
+.weekend-column {
+    width: 210px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.weekend-day {
+    position: relative;
+
+    flex: 1;
+
+    min-height: 0;
+
+    padding: 10px;
+
+    overflow: hidden;
+
+    background-color: var(--background);
+
+    border-radius: 15px;
+}
+
+.weekend-day h3 {
+    margin-top: 0;
+}
+
+
+/* =================================
+   DROP FEEDBACK
+================================= */
+
+.drop-hover {
+    background-color: var(--drop);
+}
+
+
+/* =================================
+   RESIZE HANDLE
+================================= */
+
+.task-resize-handle {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 8px;
+
+    cursor: ns-resize;
+}
+
+
+/* =================================
+   GENERAL MENU
+================================= */
+
+.menu-switcher {
+    position: fixed;
+
+    left: 15px;
+    bottom: 15px;
+
+    z-index: 1000;
+}
+
+.theme-button {
+    width: 14px;
+    height: 14px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background-color: var(--text);
+
+    cursor: pointer;
+
+    opacity: 0.5;
+
+    transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+}
+
+.theme-button:hover {
+    opacity: 1;
+
+    transform: scale(1.15);
+}
+
+
+/* =================================
+   MENU
+================================= */
+
+.menu {
+    position: absolute;
+
+    left: 0;
+    bottom: 24px;
+
+    width: 190px;
+
+    padding: 8px;
+
+    background-color: var(--panel);
+
+    border: 1px solid var(--inputborder);
+    border-radius: 12px;
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.12);
+
+    display: none;
+}
+
+.menu::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: -30px;
+
+    height: 30px;
+}
+
+.menu-switcher:hover .menu {
+    display: block;
+}
+
+
+/* =================================
+   THEME OPTIONS
+================================= */
+
+.theme-option {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 8px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.theme-option:hover {
+    background-color: var(--task);
+}
+
+
+/* =================================
+   THEME PREVIEWS
+================================= */
+
+.theme-preview {
+    width: 14px;
+    height: 14px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+}
+
+.paper-preview {
+    background-color: #E6EFE2;
+}
+
+.purple-preview {
+    background-color: #7577AD;
+}
+
+.blue-coral-preview {
+    background-color: #CE6C47;
+}
+
+.sunset-preview {
+    background-color: #F9D3AD;
+}
+
+
+/* =================================
+   RECURRING EDIT BUTTON
+================================= */
+
+.recurring-edit-button {
+    width: 100%;
+
+    margin-top: 6px;
+    padding: 8px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.recurring-edit-button:hover {
+    background-color: var(--task);
+}
+
+.recurring-edit-button.active {
+    background-color: var(--task);
+
+    font-weight: 600;
+}
+
+
+/* =================================
+   RECURRING DELETE MODAL
+================================= */
+
+.recurring-delete-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 2000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0, 0, 0, 0.15);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: opacity 0.15s ease;
+}
+
+.recurring-delete-overlay.visible {
+    opacity: 1;
+
+    pointer-events: auto;
+}
+
+
+/* =================================
+   DELETE MENU
+================================= */
+
+.recurring-delete-menu {
+    width: 300px;
+
+    padding: 20px;
+
+    background-color: var(--panel);
+
+    color: var(--text);
+
+    border: 2px solid var(--panelborder);
+    border-radius: 16px;
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.15);
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.recurring-delete-menu h3 {
+    margin: 0 0 8px;
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+    text-align: center;
+}
+
+
+/* =================================
+   DELETE OPTIONS
+================================= */
+
+.recurring-delete-option {
+    width: 100%;
+
+    padding: 10px 12px;
+
+    border: 1px solid var(--inputborder);
+    border-radius: 10px;
+
+    background-color: var(--task);
+
+    color: var(--text);
+
+    font-family: inherit;
+    font-size: 13px;
+
+    text-align: center;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.15s ease,
+        transform 0.1s ease;
+}
+
+.recurring-delete-option:hover {
+    background-color: var(--drop);
+
+    transform: translateY(-1px);
+}
+
+.recurring-delete-option:active {
+    transform: translateY(0);
+}
+
+
+/* =================================
+   RESPONSIVE SAFETY
+================================= */
+
+@media (max-width: 800px) {
+
+    .app {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .todo-panel {
+        width: 200px;
+    }
+
+    .calendar-panel {
+        padding: 12px;
+    }
+
+}
+
+/* =================================
+   LOG IN
+================================= */
+
+#authScreen {
+    position: fixed;
+    inset: 0;
+
+    z-index: 9999;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    background-color: var(--background);
+}
+
+.auth-box {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+
+    width: 300px;
+
+    padding: 30px;
+
+    background-color: var(--panel);
+
+    border-radius: 20px;
+}
+
+.auth-box input,
+.auth-box button {
+    padding: 10px;
+
+    border-radius: 8px;
+
+    border: 1px solid var(--inputborder);
+}
