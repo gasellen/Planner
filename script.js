@@ -2964,6 +2964,91 @@ document.addEventListener(
             event.touches[0];
 
 
+        // =================================
+        // RESIZE HANDLE
+        // =================================
+
+        const resizeHandle =
+            event.target.closest(
+                ".task-resize-handle"
+            );
+
+
+        if (resizeHandle) {
+
+            // Find the task element.
+            const taskElement =
+                resizeHandle.closest(".task");
+
+
+            if (!taskElement) {
+                return;
+            }
+
+
+            const taskId =
+                Number(
+                    taskElement.dataset.taskId
+                );
+
+
+            const task =
+                tasks.find(
+                    function(item) {
+                        return item.id === taskId;
+                    }
+                );
+
+
+            if (!task) {
+                return;
+            }
+
+
+            // Recurring tasks can only be
+            // resized while editing.
+            if (
+                isRecurringTask(task) &&
+                !recurringEditMode
+            ) {
+
+                return;
+
+            }
+
+
+            // Start resizing.
+            resizingTask =
+                task;
+
+
+            resizingElement =
+                taskElement;
+
+
+            resizeStartY =
+                touch.clientY;
+
+
+            resizeStartHeight =
+                taskElement.offsetHeight;
+
+
+            document.body.style.cursor =
+                "ns-resize";
+
+
+            // Prevent the normal
+            // task-drag system from starting.
+            return;
+
+        }
+
+
+        // =================================
+        // NORMAL TASK DRAG
+        // =================================
+
         const taskElement =
             event.target.closest(".task");
 
@@ -2974,7 +3059,9 @@ document.addEventListener(
 
 
         const taskId =
-            Number(taskElement.dataset.taskId);
+            Number(
+                taskElement.dataset.taskId
+            );
 
 
         const task =
@@ -3002,7 +3089,9 @@ document.addEventListener(
         }
 
 
-        touchDragTask = task;
+        touchDragTask =
+            task;
+
 
         touchDragElement =
             taskElement;
@@ -3011,12 +3100,14 @@ document.addEventListener(
         touchStartX =
             touch.clientX;
 
+
         touchStartY =
             touch.clientY;
 
 
         touchCurrentX =
             touch.clientX;
+
 
         touchCurrentY =
             touch.clientY;
@@ -3027,11 +3118,13 @@ document.addEventListener(
 
 
         touchDragOffsetX =
-            touch.clientX - rect.left;
+            touch.clientX -
+            rect.left;
 
 
         touchDragOffsetY =
-            touch.clientY - rect.top;
+            touch.clientY -
+            rect.top;
 
 
         // Wait before actually
@@ -3098,9 +3191,67 @@ document.addEventListener(
     "touchmove",
     function(event) {
 
-        if (!touchDragTask) {
+        // =================================
+        // MOBILE RESIZING
+        // =================================
+
+        if (resizingTask) {
+
+            const touch =
+                event.touches[0];
+
+
+            const deltaY =
+                touch.clientY -
+                resizeStartY;
+
+
+            const rawHeight =
+                resizeStartHeight +
+                deltaY;
+
+
+            const slotHeight =
+                CALENDAR_CONFIG.slotHeight;
+
+
+            const slots =
+                Math.round(
+                    rawHeight /
+                    slotHeight
+                );
+
+
+            const minimumSlots =
+                1;
+
+
+            const finalSlots =
+                Math.max(
+                    minimumSlots,
+                    slots
+                );
+
+
+            const finalHeight =
+                finalSlots *
+                slotHeight;
+
+
+            resizingElement.style.height =
+                `${finalHeight}px`;
+
+
+            event.preventDefault();
+
             return;
-        }
+
+    }
+
+
+    if (!touchDragTask) {
+        return;
+    }
 
 
         const touch =
@@ -3180,7 +3331,43 @@ document.addEventListener(
 document.addEventListener(
     "touchend",
     function() {
+        if (resizingTask) {
 
+            const height =
+                resizingElement.offsetHeight;
+
+
+            const slots =
+                Math.round(
+                    height /
+                    CALENDAR_CONFIG.slotHeight
+                );
+
+
+            resizingTask.duration =
+                slots *
+                CALENDAR_CONFIG.minutesPerSlot;
+
+
+            saveTasks();
+
+
+            resizingTask =
+                null;
+
+
+            resizingElement =
+                null;
+
+
+            document.body.style.cursor =
+                "";
+
+
+            return;
+
+        }
+        
         clearTimeout(
             touchHoldTimer
         );
@@ -3250,7 +3437,11 @@ document.addEventListener(
 // FIND DROP DAY
 // =================================
 
-function getTouchDropDay() {
+// =================================
+// FIND TOUCH DROP TARGET
+// =================================
+
+function getTouchDropTarget() {
 
     const elements =
         document.elementsFromPoint(
@@ -3263,12 +3454,36 @@ function getTouchDropDay() {
         const element of elements
     ) {
 
+        // =================================
+        // TODO PANEL
+        // =================================
+
+        if (
+            element.closest(".todo-panel")
+        ) {
+
+            return {
+                type: "todo",
+                element:
+                    element.closest(".todo-panel")
+            };
+
+        }
+
+
+        // =================================
+        // CALENDAR DAY
+        // =================================
+
         if (
             element.dataset &&
             element.dataset.date
         ) {
 
-            return element;
+            return {
+                type: "day",
+                element: element
+            };
 
         }
 
@@ -3280,120 +3495,7 @@ function getTouchDropDay() {
 }
 
 
-// =================================
-// FINISH TOUCH DROP
-// =================================
-
 function finishTouchDrop() {
-
-    const task =
-        touchDragTask;
-
-
-    const day =
-        getTouchDropDay();
-
-
-    if (!day) {
-
-        restoreTouchDragElement();
-
-        return;
-
-    }
-
-
-    // =================================
-    // RECURRING TASK
-    // =================================
-
-    if (isRecurringTask(task)) {
-
-        if (!recurringEditMode) {
-
-            restoreTouchDragElement();
-
-            return;
-
-        }
-
-
-        const droppedDate =
-            day.dataset.date;
-
-
-        const droppedDateObject =
-            new Date(
-                `${droppedDate}T00:00:00`
-            );
-
-
-        task.recurrence.weekday =
-            droppedDateObject.getDay();
-
-
-        if (
-            day.classList.contains("day")
-        ) {
-
-            task.startTime =
-                getTouchTimeFromPosition(
-                    day,
-                    touchCurrentY
-                );
-
-        }
-
-
-        saveTasks();
-
-        restoreTouchDragElement();
-
-        renderCalendar();
-
-        renderTasks();
-
-        return;
-
-    }
-
-
-    // =================================
-    // NORMAL TASK
-    // =================================
-
-    task.date =
-        day.dataset.date;
-
-
-    if (
-        day.classList.contains("day")
-    ) {
-
-        task.startTime =
-            getTouchTimeFromPosition(
-                day,
-                touchCurrentY
-            );
-
-    }
-
-    else {
-
-        task.startTime = null;
-
-    }
-
-
-    saveTasks();
-
-    restoreTouchDragElement();
-
-    renderCalendar();
-
-    renderTasks();
-
-}
 
 
 // =================================
@@ -3533,7 +3635,14 @@ function startTouchPan() {
             window.innerWidth;
 
 
-        // Near the RIGHT edge.
+        const scrollContainer =
+            document.scrollingElement;
+
+
+        // =================================
+        // PAN RIGHT
+        // =================================
+
         if (
             touchCurrentX >
             screenWidth -
@@ -3553,17 +3662,17 @@ function startTouchPan() {
                 TOUCH_EDGE_DISTANCE;
 
 
-            window.scrollBy({
-                left:
-                    intensity *
-                    TOUCH_PAN_SPEED,
-                top: 0
-            });
+            scrollContainer.scrollLeft +=
+                intensity *
+                TOUCH_PAN_SPEED;
 
         }
 
 
-        // Near the LEFT edge.
+        // =================================
+        // PAN LEFT
+        // =================================
+
         else if (
             touchCurrentX <
             TOUCH_EDGE_DISTANCE
@@ -3577,12 +3686,9 @@ function startTouchPan() {
                 TOUCH_EDGE_DISTANCE;
 
 
-            window.scrollBy({
-                left:
-                    -intensity *
-                    TOUCH_PAN_SPEED,
-                top: 0
-            });
+            scrollContainer.scrollLeft -=
+                intensity *
+                TOUCH_PAN_SPEED;
 
         }
 
@@ -3618,5 +3724,5 @@ function stopTouchPan() {
         touchPanAnimation = null;
 
     }
-
+}
 }
