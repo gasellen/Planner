@@ -993,8 +993,18 @@ body:not(.recurring-edit-mode)
     }
 
     .calendar-panel {
-        width: 900px;
+        width: 1000px;
         flex-shrink: 0;
+    }
+
+    /* Smaller text ONLY for tasks inside the calendar */
+    .calendar-task {
+        font-size: 10px;
+        padding: 5px 6px;
+    }
+
+    .calendar-task .task-text {
+        font-size: 10px;
     }
 
 }
