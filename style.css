@@ -976,13 +976,9 @@ body:not(.recurring-edit-mode)
 
 @media (max-width: 800px) {
 
-    html {
-        overflow-x: auto;
-        overflow-y: hidden;
-    }
-
+    html,
     body {
-        overflow-x: visible;
+        overflow-x: auto;
         overflow-y: hidden;
     }
 
@@ -1003,6 +999,7 @@ body:not(.recurring-edit-mode)
 
 }
 
+
 /* =================================
    MOBILE TOUCH DRAGGING
 ================================= */
@@ -1015,6 +1012,7 @@ body:not(.recurring-edit-mode)
 
     .touch-dragging {
         position: fixed !important;
+
         z-index: 10000 !important;
 
         pointer-events: none;
